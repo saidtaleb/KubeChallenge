@@ -1,0 +1,32 @@
+version: "3.4"
+
+services:
+  calicot-services:
+    image: calicot-services
+    build:
+      context: .
+      dockerfile: Calicot.API/Dockerfile
+    ports:
+      - 5000:5000
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ASPNETCORE_ENVIRONMENT=Development
+      - USER_SECRETS_ID=a184a0c7-33c3-4ddf-af6a-a1029cae1cc5
+    volumes:
+      - $APPDATA/Microsoft/UserSecrets/$USER_SECRETS_ID:/root/.microsoft/usersecrets/$USER_SECRETS_ID
+
+  calicot-ui:
+    image: calicot-ui
+    build:
+      context: .
+      dockerfile: Calicot.WebApp/Dockerfile
+    depends_on:
+      - calicot-services
+    ports:
+      - 8080:8080
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_ENVIRONMENT=Development
+      - USER_SECRETS_ID=a184a0c7-33c3-4ddf-af6a-a1029cae1cc5
+    volumes:
+      - $APPDATA/Microsoft/UserSecrets/$USER_SECRETS_ID:/root/.microsoft/usersecrets/$USER_SECRETS_ID
