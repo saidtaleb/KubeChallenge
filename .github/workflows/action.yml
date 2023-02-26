@@ -1,0 +1,32 @@
+name: Déployer dans l'infrastructure
+
+on:
+  push:
+    branches:
+      - "main"
+
+env:
+  IMAGE_CALICOT_SERVICES_NAME: "staleb-calicot-services"
+  IMAGE_CALICOT_UI_NAME: "staleb-calicot-ui"
+  DOCKERFILE_CALICOT_SERVICES_PATH: "Calicot.API/Dockerfile"
+  DOCKERFILE_CALICOT_UI_PATH: "Calicot.WebApp/Dockerfile"
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: "Build and push image"
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_ENDPOINT }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - run: |
+          docker build . -f ${{ env.DOCKERFILE_CALICOT_SERVICES_PATH }} -t ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_SERVICES_NAME }}:${{ github.sha }}
+          docker push ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_SERVICES_NAME }}:${{ github.sha }}
+          docker build . -f ${{ env.DOCKERFILE_CALICOT_UI_PATH }} -t ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_UI_NAME }}:${{ github.sha }}
+          docker push ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_UI_NAME }}:${{ github.sha }}
