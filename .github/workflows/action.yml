@@ -1,32 +1,59 @@
 name: Déployer dans l'infrastructure
 
 on:
-  push:
-    branches:
-      - "main"
+    push:
+        branches:
+            - "main"
 
 env:
-  IMAGE_CALICOT_SERVICES_NAME: "staleb-calicot-services"
-  IMAGE_CALICOT_UI_NAME: "staleb-calicot-ui"
-  DOCKERFILE_CALICOT_SERVICES_PATH: "Calicot.API/Dockerfile"
-  DOCKERFILE_CALICOT_UI_PATH: "Calicot.WebApp/Dockerfile"
+    IMAGE_CALICOT_SERVICES_NAME: "staleb-calicot-services"
+    IMAGE_CALICOT_UI_NAME: "staleb-calicot-ui"
+    DOCKERFILE_CALICOT_SERVICES_PATH: "Calicot.API/Dockerfile"
+    DOCKERFILE_CALICOT_UI_PATH: "Calicot.WebApp/Dockerfile"
+    CLUSTER_NAME: "KubeChallenge-AKS"
+    RESOURCE_GROUP: "kubeChallenge-Round1-rg"
 
 jobs:
-  build-and-deploy:
-    name: Build & Deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    pousser-images:
+        name: Pousser les images vers l'ACR
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
 
-      - name: "Build and push image"
-        uses: azure/docker-login@v1
-        with:
-          login-server: ${{ secrets.ACR_ENDPOINT }}
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
-      - run: |
-          docker build . -f ${{ env.DOCKERFILE_CALICOT_SERVICES_PATH }} -t ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_SERVICES_NAME }}:${{ github.sha }}
-          docker push ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_SERVICES_NAME }}:${{ github.sha }}
-          docker build . -f ${{ env.DOCKERFILE_CALICOT_UI_PATH }} -t ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_UI_NAME }}:${{ github.sha }}
-          docker push ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_UI_NAME }}:${{ github.sha }}
+            - name: "Build and push image"
+              uses: azure/docker-login@v1
+              with:
+                  login-server: ${{ secrets.ACR_ENDPOINT }}
+                  username: ${{ secrets.ACR_USERNAME }}
+                  password: ${{ secrets.ACR_PASSWORD }}
+            - run: |
+                  docker build . -f ${{ env.DOCKERFILE_CALICOT_SERVICES_PATH }} -t ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_SERVICES_NAME }}:latest
+                  docker push ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_SERVICES_NAME }}:latest
+                  docker build . -f ${{ env.DOCKERFILE_CALICOT_UI_PATH }} -t ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_UI_NAME }}:latest
+                  docker push ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_UI_NAME }}:latest
+
+    deployer-AKS:
+        name: Déployer dans AKS
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - name: "Az CLI login"
+              uses: azure/login@v1
+              with:
+                  client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                  tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                  subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+            - name: Set AKS context
+              id: set-context
+              uses: azure/aks-set-context@v3
+              with:
+                  resource-group: "${{ secrets.RESOURCE_GROUP }}"
+                  cluster-name: "${{ secrets.CLUSTER_NAME }}"
+
+            - uses: azure/k8s-deploy@v1
+              with:
+                  manifests: k8s
