@@ -37,6 +37,7 @@ jobs:
     name: Déployer dans AKS
     runs-on: ubuntu-latest
     needs: pousser-images
+    environment: prod
     permissions:
       id-token: write
       contents: read
