@@ -53,11 +53,11 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Set AKS context
-        id: set-context
         uses: azure/aks-set-context@v3
         with:
           resource-group: "${{ secrets.RESOURCE_GROUP }}"
           cluster-name: "${{ secrets.CLUSTER_NAME }}"
+          admin: "false"
 
       - uses: azure/k8s-deploy@v1
         with:
