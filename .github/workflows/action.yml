@@ -21,6 +21,7 @@ jobs:
 
       - name: "Mettre à jour les URL"
         run: |
+          ls
           sed -i '${{ secrets.REGEX_REPLACE_URL_API }}' "Calicot.WebApp\ClientApp\src\environments\environment.prod.ts"
           sed -i '${{ secrets.REGEX_ADD_URL_WEB }}' "Calicot.API\Program.cs"
 
