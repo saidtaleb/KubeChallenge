@@ -10,8 +10,6 @@ env:
   IMAGE_CALICOT_UI_NAME: "staleb-calicot-ui"
   DOCKERFILE_CALICOT_SERVICES_PATH: "Calicot.API/Dockerfile"
   DOCKERFILE_CALICOT_UI_PATH: "Calicot.WebApp/Dockerfile"
-  CLUSTER_NAME: "KubeChallenge-AKS"
-  RESOURCE_GROUP: "kubeChallenge-Round1-rg"
 
 jobs:
   pousser-images:
@@ -20,6 +18,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: "Mettre à jour les URL"
+        run: |
+          sed -i '${{ secrets.REGEX_REPLACE_URL_API }}' "Calicot.WebApp\ClientApp\src\environments\environment.prod.ts"
+          sed -i '${{ secrets.REGEX_ADD_URL_WEB }}' "Calicot.API\Program.cs"
 
       - name: "Build and push image"
         uses: azure/docker-login@v1
@@ -32,33 +35,3 @@ jobs:
           docker push ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_SERVICES_NAME }}:latest
           docker build . -f ${{ env.DOCKERFILE_CALICOT_UI_PATH }} -t ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_UI_NAME }}:latest
           docker push ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_UI_NAME }}:latest
-
-  deployer-AKS:
-    name: Déployer dans AKS
-    runs-on: ubuntu-latest
-    needs: pousser-images
-    environment: prod
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: "Az CLI login"
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Set AKS context
-        uses: azure/aks-set-context@v3
-        with:
-          resource-group: ${{ secrets.RESOURCE_GROUP }}
-          cluster-name: ${{ secrets.CLUSTER_NAME }}
-          admin: "false"
-
-      - uses: azure/k8s-deploy@v1
-        with:
-          manifests: k8s

@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: calicot-services-lb-srv
+  name: staleb-calicot-services-lb-srv
   namespace: dev
 spec:
   type: LoadBalancer
   ports:
     - port: 80
   selector:
-    app: calicot-services
+    app: staleb-calicot-services
