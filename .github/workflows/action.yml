@@ -22,8 +22,8 @@ jobs:
       - name: "Mettre à jour les URL"
         run: |
           ls
-          sed -i 's/${{ secrets.REGEX_REPLACE_URL_API }}/g' "Calicot.WebApp\ClientApp\src\environments\environment.prod.ts"
-          sed -i 's/${{ secrets.REGEX_ADD_URL_WEB }}/g' "Calicot.API\Program.cs"
+          sed -i 's/${{ secrets.REGEX_REPLACE_URL_API }}/g' "Calicot.WebApp/ClientApp/src/environments/environment.prod.ts"
+          sed -i 's/${{ secrets.REGEX_ADD_URL_WEB }}/g' "Calicot.API/Program.cs"
 
       - name: "Build and push image"
         uses: azure/docker-login@v1
