@@ -8,8 +8,10 @@ on:
 env:
   IMAGE_CALICOT_SERVICES_NAME: "staleb-calicot-services"
   IMAGE_CALICOT_UI_NAME: "staleb-calicot-ui"
+  IMAGE_CALICOT_FUNCTION_NAME: "staleb-calicot-function"
   DOCKERFILE_CALICOT_SERVICES_PATH: "Calicot.API/Dockerfile"
   DOCKERFILE_CALICOT_UI_PATH: "Calicot.WebApp/Dockerfile"
+  DOCKERFILE_CALICOT_FUNCTION_PATH: "Calicot.Function/Dockerfile"
 
 jobs:
   pousser-images:
@@ -36,3 +38,5 @@ jobs:
           docker push ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_SERVICES_NAME }}:latest
           docker build . -f ${{ env.DOCKERFILE_CALICOT_UI_PATH }} -t ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_UI_NAME }}:latest
           docker push ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_UI_NAME }}:latest
+          docker build . -f ${{ env.DOCKERFILE_CALICOT_FUNCTION_PATH }} -t ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_FUNCTION_NAME }}:latest
+          docker push ${{ secrets.ACR_ENDPOINT }}/${{ env.IMAGE_CALICOT_FUNCTION_NAME }}:latest
