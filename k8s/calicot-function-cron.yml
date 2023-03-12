@@ -13,3 +13,4 @@ spec:
             - name: staleb-calicot-function
               image: kubechallengeacr.azurecr.io/staleb-calicot-function:latest
               imagePullPolicy: IfNotPresent
+          restartPolicy: OnFailure
