@@ -1,5 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS installer-env
 
+RUN apt-get update && apt-get install -y apt-utils libgdiplus libc6-dev
 COPY /Calicot.Function/ /src/dotnet-function-app
 RUN cd /src/dotnet-function-app && \
     mkdir -p /home/site/wwwroot && \
