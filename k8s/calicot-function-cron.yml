@@ -5,6 +5,9 @@ metadata:
   namespace: dev
 spec:
   schedule: "*/5 * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  concurrencyPolicy: Replace
   jobTemplate:
     spec:
       template:
@@ -13,4 +16,10 @@ spec:
             - name: staleb-calicot-function
               image: kubechallengeacr.azurecr.io/staleb-calicot-function:latest
               imagePullPolicy: IfNotPresent
+              env:
+                - name: AzureWebJobsStorage
+                  valueFrom:
+                    configMapKeyRef:
+                      name: "calicot-configmap"
+                      key: "AzureWebJobsStorage"
           restartPolicy: OnFailure

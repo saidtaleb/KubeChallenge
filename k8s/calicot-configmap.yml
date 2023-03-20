@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: calicot-configmap
+  namespace: dev
+data:
+  AzureWebJobsStorage: "DefaultEndpointsProtocol=https;AccountName=stcalicotkubechallenge;AccountKey=PNiBeHqncRaxrmrfGg9WM3Yuqc4McSX/HOjAYVx3Zr/7YFhy/g/nUel0Y63fivxMVkl5P4JhQ1Ay+AStOYEkig==;EndpointSuffix=core.windows.net"
